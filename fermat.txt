@@ -1,0 +1,10 @@
+function fermat(n)
+	 A := { i : i in [1..n-1] | GreatestCommonDivisor(i,n) eq 1};
+	 prime := true;
+	 for a in A do
+	     if ( a^(n-1) mod n ne 1) then
+	     	prime := false;
+	     end if;
+	 end for;
+	 return  prime;
+end function;

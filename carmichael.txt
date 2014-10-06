@@ -1,0 +1,10 @@
+x := 0;
+i := 2;
+while( x lt 3) do
+       if (fermat(i) ne IsPrime(i)) then
+       	  print  i;
+       	  x := x + 1;
+       end if;
+       i := i+1;
+end while;
+

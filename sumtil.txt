@@ -1,0 +1,14 @@
+function sumtil(N)
+	 s := 0;
+	 for i in [1..N] do
+	     s := s + i;
+	 end for;
+	 return s;
+end function;
+
+x := true;
+
+for i in [1..1000] do
+    print sumtil(i) eq (i*(i+1)/2);
+end for;
+

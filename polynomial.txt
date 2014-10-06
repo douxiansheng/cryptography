@@ -1,0 +1,11 @@
+function poly(q,d)
+	 Z<x> := PolynomialRing(GF(q));
+	 F := GF(q);
+	 V := VectorSpace(F, d+1);	 
+	 C := Random(V); 
+	 p := 0;
+	 for i in [0..d] do
+	     p +:= C[i+1]*x^i;
+	 end for;	 
+	 return p;
+end function;
