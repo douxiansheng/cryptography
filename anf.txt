@@ -1,0 +1,43 @@
+V := {v: v in VectorSpace(GF(2), 4)};
+F := Random(Sym(V));
+EV := []; 
+P<x,y,z,w> := PolynomialRing(GF(2),4);
+L := [x^0];
+
+//generate  list of monomials
+
+D := {x,y,z,w};
+for k in [1..4] do
+    for S in Subsets(D, k) do
+	L := Append(L, &*S);
+    end for;
+end for;
+
+L := Reverse(L);
+MetaMat := [];
+// generate matrix of coefficients
+for v in V do
+    l := [];
+    r := v^F;
+    EV := Append(EV, r);
+    for monomial in L do
+    	seqv := ElementToSequence(v);
+	ev := Evaluate(monomial, seqv);
+	l := Append(l, ev);
+    end for;
+    MetaMat := Append(MetaMat, l);
+end for;
+
+Res := [];
+for i in [1..4] do
+    Res := Append(Res, Vector(GF(2), [ v[i]: v in EV]));
+end for;
+
+M := Matrix(GF(2), 16, 16, MetaMat);
+C := [Solution(M, v) : v in Res];
+
+Fx := [];
+
+for i in [1..4] do
+    Fx[i] := &+[L[k]*C[i][k] : k in [1..16]];
+end for;
