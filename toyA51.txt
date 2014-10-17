@@ -1,0 +1,66 @@
+function Shift(l)
+   n := #l;
+   res := [l[i]: i in [1..n-1]];
+   return  res;
+end function;
+
+P<a,b,c> := PolynomialRing(GF(2), 3);
+F<x> := PolynomialRing(GF(2));
+
+function lfsr(L, pos)
+    new := &+[L[#L - j + 1]: j in pos];
+    L := &cat[[new], Shift(L)];
+    return L;
+end function;
+
+
+function ToyA51(S, l)
+
+    // initial states
+    R1 := S[1];
+    R2 := S[2];
+    R3 := S[3];
+    
+    // taps
+    t1 := 5;
+    t2 := 3;
+    t3 := 4;
+    
+    // connection polynomials
+    p1 := F!x^5 + x^2 + 1;
+    p2 := F!x^7 + x + 1;
+    p3 := F!x^5 + x^3 + 1;
+    
+    
+    // extract position of connections
+    polSeq := ElementToSequence(p1);
+    pos1 := [i : i in [1..#polSeq-1] | polSeq[i] eq 1];
+    polSeq := ElementToSequence(p2);
+    pos2 := [i : i in [1..#polSeq-1] | polSeq[i] eq 1];
+    polSeq := ElementToSequence(p3);
+    pos3 := [i : i in [1..#polSeq-1] | polSeq[i] eq 1];
+    
+    // Majority function
+    major := a*b + a*c + b*c;
+    K := [];
+    
+    for i in [1..l] do
+        out1 := R1[#R1];
+        out2 := R2[#R2];    
+        out3 := R3[#R3];
+        res := Evaluate(major, [R1[t1], R2[t2], R3[t3]]);
+        if (res + R1[t1] eq 0) then
+           R1 := lfsr(R1, pos1);
+        end if;
+        if (res + R2[t2] eq 0) then
+           R2 := lfsr(R2, pos2);
+        end if;
+        if (res + R3[t3] eq 0) then
+           R3 := lfsr(R3, pos3);
+        end if;
+        out := out1 + out2 + out3;
+        K := Append(K, out);
+    end for;
+    return [R1,R2,R3], K;
+
+end function;
