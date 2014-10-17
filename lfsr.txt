@@ -11,7 +11,8 @@ function lfsr(p, L, t)
 	 K := []; // keystream
 
 	 // extracting positions to combine
-
+	 polSeq := ElementToSequence(p);
+	 positions := [i : i in [1..#polSeq-1] | polSeq[i] eq 1];
 	 for i in [1..t] do
     	      new := &+[L[#L - j + 1]: j in positions];
     	      new := new mod 2;
