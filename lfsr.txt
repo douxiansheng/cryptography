@@ -1,0 +1,23 @@
+function Shift(l)
+	 n := #l;
+	 res := [l[i]: i in [1..n-1]];
+	 return  res;
+end function;
+
+P<x> := PolynomialRing(GF(2));
+
+function lfsr(p, L, t)
+	 S := [L];
+	 K := []; // keystream
+
+	 // extracting positions to combine
+
+	 for i in [1..t] do
+    	      new := &+[L[#L - j + 1]: j in positions];
+    	      new := new mod 2;
+    	      K := Append(K, L[#L]);
+    	      L := &cat[[new], Shift(L)];
+    	      S := Append(S,L);
+	 end for;
+	 return S,K;
+end function;
