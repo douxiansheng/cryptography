@@ -1,0 +1,19 @@
+Write a MAGMA code for a function that given randomly a permutation F of the vector space (GF(2))^4, it returns the ANF of F.
+
+Notes:
+1. To generate randomly a permutation F of (GF(2))^4:
+   i) define the set V:={v:v in VectorSpace(GF(2),4)}
+   ii) define F:=Random(Sym(V)), where Sym(V) is the set of all permutations of V
+
+2. In MAGMA, the image of an element v in V by F is defined by v^F
+
+3. Solution(A, w) : ModMatRngElt, ModTupRng -> ModTupRngElt, ModTupRng
+
+    Given a matrix A belonging to M_n(R) and a vector w belonging to the
+    tuple module R^n, solve the system of linear equations 
+    v * A =w.  
+    The function returns two values:
+    A particular solution v;
+    The kernel K of A so that (v + k) * A = w for k in K. 
+
+

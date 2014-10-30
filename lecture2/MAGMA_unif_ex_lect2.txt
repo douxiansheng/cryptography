@@ -1,0 +1,31 @@
+Ex 2.1
+Check that 1+..+n=(n+1)n/2 for every n in {1,..,1000}
+
+Ex 2.2
+function isFermatPseudoPrime(n)
+// returns true iff for all a, 0<a<n, we have that a^{n-1) mod n = 1 (n verifies Fermat's Little Theorem)
+
+// ...
+
+end function;
+
+using the above function find the first 3 Carmichael numbers (a non prime number which is Fermat pseudoprime)
+
+Ex 2.3
+function randomPolynomialOfDegree(q,d)
+// returns a random polynomial of degree d over GF(q)
+
+// ...
+
+end function;
+
+Ex 2.4
+
+function allDiagonalizableMatrices(q,n)
+// Outputs the set of all Diagonalizable Matrices of dimension n x n over GF(q)
+
+// ...
+
+end function;
+
+compute the number of all diagonalizable matrices for (q,n) = (2,2),(2,3),(2,4),(3,2),(3,3),(4,2),(5,2)

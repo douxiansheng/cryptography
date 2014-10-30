@@ -1,0 +1,141 @@
+EX.
+Build a block cipher with the following components:
+
+1) A function KSchedule(K,n) 
+   INPUT:	- A list, K, of 8 bits
+ 		      - A natural number, n, which is the number of rounds
+	
+   OUTPUT:	- A list of n+1 lists: KS=[K1,...,K_{n+1}], where K_i is a list of 8 bits.
+   
+   Specification. In your function you must define two permutations S1, S2 (you can see them as Vectorial Boolean functions).
+
+                  
+the S1 permutation is:
+((1 1 0 1), (0 1 0 1), (1 0 1 1), (1 0 0 1), (0 1 1 1), (0 0 1 0), (0 0 0 1))((1 0 1 0), (1 1 1 1), (1 1 1 0), (0 1 1 0), (0 0 1 1))((0 1 0 0), (1 0 0 0))
+
+                   
+the S2 permutation is:
+((1 1 0 1), (0 1 0 1), (1 0 1 1), (1 0 0 1), (0 1 1 1), (0 0 1 0), (0 0 0 1))((1 0 1 0), (1 1 1 1), (1 1 1 0), (0 1 1 0), (0 0 1 1))((0 1 0 0), (1 0 0 0))
+
+Remark: you can defein them in magma in this way:
+V4:=VectorSpace(GF(2),4);
+V:={v: v in V4};
+Sy4:=SymmetricGroup(V);
+S1 := Sy4 ! (V4 ! [1, 1, 0, 1], V4 ! [0, 1, 0, 1], V4 ! [1, 0, 1, 1], V4 ! [1, 0, 0, 1], V4 ! [0, 1, 1, 1], V4 ! [0, 0, 1, 0], V4 ! [0, 0, 0, 1])(V4 ! [1, 0, 1, 0], V4 ! [1, 1, 1, 1], V4 ! [1, 1, 1, 0], V4 ! [0, 1, 1, 0], V4 ! [0, 0, 1, 1])(V4 ! [0, 1, 0, 0], V4 ! [1, 0, 0, 0]);
+S2 := Sy4 ! (V4 ! [1, 1, 0, 0], V4 ! [1, 1, 1, 0], V4 ! [0, 0, 0, 0], V4 ! [1, 1, 0, 1], V4 ! [1, 1, 1, 1], V4 ! [1, 0, 0, 1], V4 ! [0, 1, 0, 0], V4 ! [0, 0, 0, 1], V4 ! [0, 0, 1, 0], V4 ! [0, 1, 1, 0], V4 ! [1, 0, 1, 1], V4 ! [0, 1, 1, 1], V4 ! [0, 0, 1, 1], V4 ! [0, 1, 0, 1])(V4 ! [1, 0, 1, 0], V4 ! [1, 0, 0, 0]);
+
+
+the key schedule works as follows:
+ ______ 	 _________       
+|      |	|         |	     
+|  K1  |        |S2(K5..8)|   
+|______|	|_________|	       
+|      |	|         |	    
+|  K2  |        |S2(K5..8)|     
+|______|	|_________|	
+|      |	|         |	    
+|  K3  |        |S2(K5..8)|     
+|______|	|_________|	
+|      |	|         |	    
+|  K4  |        |S2(K5..8)|     
+|______|	|_________|
+
+	                      ......
+ ______          _________
+|      |	|         |	    
+|  K5  |        |S1(K1..4)|   
+|______|	|_________|	
+|      |	|         |	    
+|  K6  |        |S1(K1..4)|     
+|______|	|_________|	
+|      |	|         |	    
+|  K7  |        |S1(K1..4)|     
+|______|	|_________|	
+|      |	|         |	    
+|  K8  |        |S1(K1..4)|     
+|______|	|_________|	
+
+  
+
+KS[1]      KS[2]              ......
+
+Remark: you may - or may not (your choice) - use the ANFpermutation function you eventually wrote in Magma Lab session 3.
+
+-> TEST your KSchedule function:
+
+> testK := [GF(2) | 0,1,1,1,0,0,1,0];
+> KSchedule(testK,10);
+[
+    [ 0, 1, 1, 1, 0, 0, 1, 0 ],
+    [ 0, 1, 1, 0, 0, 0, 1, 0 ],
+    [ 0, 1, 1, 0, 0, 0, 1, 1 ],
+    [ 0, 1, 0, 1, 0, 0, 1, 1 ],
+    [ 0, 1, 0, 1, 1, 0, 1, 1 ],
+    [ 0, 1, 1, 1, 1, 0, 1, 1 ],
+    [ 0, 1, 1, 1, 0, 0, 1, 0 ],
+    [ 0, 1, 1, 0, 0, 0, 1, 0 ],
+    [ 0, 1, 1, 0, 0, 0, 1, 1 ],
+    [ 0, 1, 0, 1, 0, 0, 1, 1 ],
+    [ 0, 1, 0, 1, 1, 0, 1, 1 ]
+]
+
+2) The S-box to use is S1.
+
+3) the MixingLayer is a linear function associated to the 8x8 circulant matrix over GF(2) of the vector 
+   (1,1,1,1,1,0,0,0).
+   Write a function Mlay(m) which takes as input and output a sequence of 8 bits
+
+Remark: a circulant matrix of a vector is built row by row with the right shift of the vector
+(row 1 has no shift, row 2 shifts once to the right and so on...).
+Example: the 3x3 circulant matrix of (1,0,0) is the identity matrix.
+
+-> TEST your Mlay function:
+> m := [ 0, 0, 0, 1, 1, 1, 1, 1 ];
+> Mlay(m);
+[ 0, 1, 0, 1, 0, 1, 0, 0 ]
+
+4) Your block cipher will be a function ToyBlock(K,M,n)
+INPUT: 	- K, is a secret master key of length 8 over GF(2)
+	      - M, is a message of length 8 over GF(2)
+	      - n is the number of round
+OUTPUT:  - C, a ciphertext of length 8 over GF(2)
+
+To obtain C you have to perform
+                 
+ ______     _KS[1]          ______         ______        _KS[2]
+|      |   |      |        |      |       |      |      |      | 
+|  M1  | + |  k1  |-----   |      |       |      |  +   |  k1  |
+|______|   |______|    |   |______|       |______|      |______|       
+|      |   |      |    |   |      |       |      |      |      | 
+|  M2  | + |  k2  |    |   |      |       |      |  +   |  k2  |
+|______|   |______|--- S1- |______|       |______|      |______|       
+|      |   |      |    |   |      |       |      |      |      | 
+|  M3  | + |  k3  |----|   |      |       |      |  +   |  k3  |
+|______|   |______|    |   |______|       |______|      |______|       
+|      |   |      |    |   |      |       |      |      |      | 
+|  M4  | + |  k4  |-----   |      |       |      |  +   |  k4  |
+|______|   |______|        |______|       |______|      |______|
+ ______     ______          ______  MLAYER ______        ______    ......
+|      |   |      |        |      |       |      |      |      | 
+|  M5  | + |  k5  |----    |      |       |      |  +   |  k5  |
+|______|   |______|    |   |______|       |______|      |______|       
+|      |   |      |    |   |      |       |      |      |      | 
+|  M6  | + |  k6  |    |   |      |       |      |  +   |  k6  |
+|______|   |______|--- S1- |______|       |______|      |______|       
+|      |   |      |    |   |      |       |      |      |      | 
+|  M7  | + |  k7  |----|   |      |       |      |  +   |  k7  |
+|______|   |______|    |   |______|       |______|      |______|       
+|      |   |      |    |   |      |       |      |      |      | 
+|  M8  | + |  k8  |----|   |      |       |      |  +   |  k8  |
+|______|   |______|        |______|       |______|      |______| 
+                       
+                     |_______________ n times ____________________|
+
+
+-> TEST your ToyBlock function:
+
+> testK := [GF(2) | 0,1,1,1,0,0,1,0];
+> m := [ 0, 0, 0, 1, 1, 1, 1, 1 ];
+> ToyBlock(testK,m,10);
+[ 0, 0, 0, 0, 1, 0, 1, 0 ]
+

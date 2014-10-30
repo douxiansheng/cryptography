@@ -1,0 +1,58 @@
+
+    V4 := VectorSpace(GF(2), 4);
+    V:={v:v in V4};
+    Sy4 := Sym(V);
+
+    S1 := Sy4 ! (V4 ! [1, 1, 0, 1], V4 ! [0, 1, 0, 1], V4 ! [1, 0, 1, 1], V4 ! [1, 0, 0, 1], V4 ! [0, 1, 1, 1], V4 ! [0, 0, 1, 0], V4 ! [0, 0, 0, 1])(V4 ! [1, 0, 1, 0], V4 ! [1, 1, 1, 1], V4 ! [1, 1, 1, 0], V4 ! [0, 1, 1, 0], V4 ! [0, 0, 1, 1])(V4 ! [0, 1, 0, 0], V4 ! [1, 0, 0, 0]);
+    S2 := Sy4 ! (V4 ! [1, 1, 0, 0], V4 ! [1, 1, 1, 0], V4 ! [0, 0, 0, 0], V4 ! [1, 1, 0, 1], V4 ! [1, 1, 1, 1], V4 ! [1, 0, 0, 1], V4 ! [0, 1, 0, 0], V4 ! [0, 0, 0, 1], V4 ! [0, 0, 1, 0], V4 ! [0, 1, 1, 0], V4 ! [1, 0, 1, 1], V4 ! [0, 1, 1, 1], V4 ! [0, 0, 1, 1], V4 ! [0, 1, 0, 1])(V4 ! [1, 0, 1, 0], V4 ! [1, 0, 0, 0]);
+    
+
+
+function Shift(l)
+   n := #l;
+   res := [l[i]: i in [1..n-1]];
+   return  [l[n]] cat res;
+end function;
+
+
+function KSchedule(K,n)
+    
+    result := K;    
+    Schedule := [result];
+    for i in [1..n] do
+    	 K1 := Vector(result[5..8])^S2;
+    	 K2 := Vector(result[1..4])^S1;
+	 result := ElementToSequence(K1) cat ElementToSequence(K2);
+	 Schedule := Append(Schedule, result);
+    end for;
+    
+    return Schedule;
+end function;    
+
+
+function MLay(m)
+    g := [1,1,1,1,1,0,0,0];
+    v := Vector(GF(2), m);
+    MetaMat := [g];
+    for i in [1..#g-1] do
+        g := Shift(g);
+        MetaMat := Append(MetaMat, g);
+    end for;
+    M := Matrix(GF(2), 8, 8, MetaMat);
+    return v*Transpose(a);
+end function;
+
+
+function ToyBlock(K, M, n)
+    S := KSchedule(K, n);
+    v := Vector(GF(2), M);
+    for i in [1..n] do
+    	v := v + Vector(GF(2), S[i]);
+	v1 := Vector(GF(2), ElementToSequence(v)[1..4])^S1;
+	v2 := Vector(GF(2), ElementToSequence(v)[5..8])^S1;
+	v := Vector(GF(2), ElementToSequence(v1) cat ElementToSequence(v2));
+	v := MLay(v);
+    end for;
+    v := v + Vector(GF(2), S[n+1]);
+    return v;
+end function;

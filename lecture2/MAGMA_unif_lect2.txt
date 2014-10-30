@@ -1,0 +1,417 @@
+// magmalab2 session: intro to programming with magma
+// (version 3/10/2014)
+
+SetLogFile("magmalab2_3ott2014.log.magma.txt");
+
+/// TODAY ///
+/*
+1. leftovers from magmalab1: &, time, load; multivariate polynomials, matrices.
+2. conditionals and loops: if then else, for in do, while do, repeat until.
+3. programming: functions, procedures.
+
+Exercises
+*/
+//////////////////
+
+/////////////////////////////////////////////////////// PART 1
+
+/// OPERATOR & ///
+
+// & operator applies an operator iteratively to a sequence or set of elements
+&+[1..10];
+&*[1..10];
+&or{IsPrime(n): n in {2,3,5,7,9}};
+&meet[{m*n:m in [1..1000]}: n in {2,3,5,7,9}];
+
+/////////////////
+
+
+
+/// TIME ///
+
+// time command is used to time the duration of a command in real time
+n := 2^109-1;
+time Factorization(n);
+m := 2^111-1;
+n := 2^113-1;
+
+// Cputime() is used to measure CPU time between two moments
+t := Cputime();
+Factorization(m);
+Factorization(n);
+Cputime(t);
+
+///////////////
+
+
+
+/// LOAD ////
+
+// load command is used to load a script of magma commands
+// (the file must be in the directory you launched magma)
+
+load"example_script.magma.txt";
+
+load"example_script2.magma.txt";
+
+
+// all examples from magma handbook can be called by load
+
+load"H1E1";
+
+load"H3E1";
+
+// SetEchoInput(true); is used to be able to see input of loaded file.
+//////////////////
+
+
+
+/// Multivariate polynomials ///
+
+// remember univariate polynomials?
+R<x>:=PolynomialRing(Integers());
+R;
+p:=3*x^3+5*x+1;
+Coefficients( p );
+ElementToSequence(p);
+R![1,0,0,10,2,3]; // a nice casting:
+
+// multivariate polynomials allow you to handle more than one variable
+RR<x,y>:=PolynomialRing(Integers(),2); //(2 is how many variables we consider)
+RR;
+x*y+2 in RR;
+Evaluate(x*y+2,[2,1]);
+Evaluate(x*y+2,[x,1]);
+Evaluate(x*y+2,2,1); //(evaluate the second variable y with 1)
+
+///////////////////////////////
+
+/////////////////////////////////////////////////////// PART 2
+
+
+
+/// IF CONDITIONAL ///
+
+// syntax is:
+// if (boolean condition) then (expression;) end if;
+if IsPrime(2^2^4+1) then                                      
+   print "I have evidence which supports a Conjecture by Fermat";
+end if;
+
+// syntax is:
+// if (boolean condition) then (expression;) else (expression;) end if;
+if IsPrime(2^2^5+1) then                                      
+   print "I have evidence which supports a Conjecture by Fermat";
+   else
+      print "<A conjecture by Fermat is false>, Euler 1732";
+end if;
+
+//////////////////////
+
+
+
+
+/// FOR LOOP ///
+
+// syntax is:
+// for (identifier) in (set/sequence) do (expression;) end for;
+
+F<x>:=GF(4);
+for i in F do i; end for;
+
+for i in [1..10] do
+   2^2^i+1;
+end for;
+
+// Example: write Binary representation of a number:
+n:=35;
+L:=[];
+d:=n;
+for i in [1..n] do
+  L[i]:= d mod 2;
+  d div:= 2;
+  if d eq 0 then
+    break;
+  end if;
+end for;
+Reverse(L);
+
+
+////////////////
+
+
+
+/// WHILE DO ///
+
+// syntax is;
+// while (boolean condition) do (expression;) end while;
+
+// Example: write Binary representation of a number:
+n:=35;
+L:=[];
+d:=n;
+while d ne 0 do
+  L cat:= [d mod 2];
+  d div:= 2;
+end while;
+Reverse(L);
+
+// Example: Erathostenes Sieve
+N := 1000;
+X := {3..N by 2}; 
+P := {2};
+
+deleted_elements := N div 2;
+
+while deleted_elements ne 1 do
+   p := Minimum(X);
+   P join:= {p};
+   D := {i*p: i in [1..N]} meet X;
+   X diff:= D;
+
+   deleted_elements := #D;
+end while;
+
+P := P join X;
+// output
+print "there are", #P,"primes below", N;
+print "the statement above is",&and{IsPrime(i):i in P};
+print "type 'P;' to see them";
+
+/////////////////////////
+
+
+
+/// REPEAT UNTIL ///
+
+// syntax is:
+// repeat (expression;) until (boolean condition);
+N := 10000;
+X := {3..N by 2}; 
+P := {2};
+
+repeat
+   p := Minimum(X);
+   P join:= {p};
+   D := {i*p: i in [1..N]} meet X;
+   X diff:= D;
+
+   deleted_elements := #D;
+until deleted_elements ne 1;
+
+P := P join X;
+
+// output
+print "there are", #P,"primes below", N;
+print "the statement above is",&and{IsPrime(i):i in P};
+print "type 'P;' to see them";
+
+// Difference with while?
+/*
+1. condition is checked at the end of every cycle
+(always run at list once the code in the cycle - while "while" might never get into the cycle)
+2. boolean condition is "negation" of boolean condition for while:
+in while you loop if condition is true
+in repeat you stop looping when condition is true
+*/
+
+///////////////////////////
+
+
+
+/////////////////////////////////////////////////////// PART 3
+
+
+
+/// SCRIPTS ///
+
+// a script is just some lines of code
+P<x> := PolynomialRing(IntegerRing());
+Tartaglia := [Coefficients((x+1)^n) : n in [0..10]];
+print "basic display";
+Tartaglia;
+print "refined version";
+for line in Tartaglia do
+   for point in line do printf "%*o", cwide, point where cwide is 5; end for;
+   printf "\n";
+end for;
+delete P;
+
+//////////////////////
+
+
+
+/// FUNCTIONS ///
+
+// a function is a reusable piece of code which has inputs and on output
+// syntax is:
+/*
+function nameOfMyFunction(input1, input2, input3)
+ // ... some expression
+return result_of_computation; // at some point this MUST appear.
+// ... maybe othe expressions
+return result_of_another_computation; // maybe it appears again
+end function;
+*/
+
+// example: is a number perfect?
+function isPerfect(n)
+  
+  return n eq &+[d: d in [1..(n-1)] | n mod d eq 0];
+
+end function;
+
+// test:
+for n in [2..30] do
+  if isPerfect(n) then
+    print n, " is PERFECT!";
+  else
+    print n, "is not perfect!";
+  end if;
+end for;
+
+// example sieve of erathostenes
+function primes_below(N)
+   
+   X := {3..N by 2}; 
+   P := {2};
+
+   deleted_elements := N div 2;
+
+   while deleted_elements ne 1 do
+      p := Minimum(X);
+      P join:= {p};
+      D := {i*p: i in [1..N]} meet X;
+      X diff:= D;
+
+      deleted_elements := #D;
+   end while;
+
+
+   P := P join X;
+
+   return P;
+end function;
+time P:=primes_below(1000); 
+time P:=primes_below(10000);   
+time P:=primes_below(100000); 
+
+// see how to do recursive functions
+load"H2E1";
+
+//////////////////
+
+/// PROCEDURES
+
+// a function is a reusable piece of code which has inputs but no outputs
+// syntax is:
+/*
+procedure nameOfMyFunction(input1, input2, ~input3)
+ // ... some expression
+end procedure;
+*/
+
+// example: tey can be used to output stuff
+procedure RandomPrime()
+   M := 2^7;
+   F := GF(2);
+   V := VectorSpace(F,M);
+   v := Random(V);
+   Z := IntegerRing();
+   vint := [Z!v[i]:i in [1..M]];
+   N := SequenceToInteger(Eltseq(vint),2);
+   P := NextPrime(N);
+   print P, "is a random prime with", Ilog(10,P), "digits";
+end procedure;
+
+// other example
+procedure pause(secondi : N :=1000*50)
+   // with N as default this is roughly a second on my pc
+   for i in [0..N*secondi] do
+      f := Factorization(2^109-1);
+   end for;
+end procedure;
+
+// an example from handbook
+load"H2E5";
+
+// What's with the tilde ("~") you put in the syntax??
+// it marks a referenced variable
+// this can be modified by a procedure and **it stays modified**
+
+procedure Shuffle(~list)
+   p := Random(Permutations({1..#list}));
+   list := list[p];
+end procedure;
+
+procedure cheaterShuffle(list)
+   p := Random(Permutations({1..#list}));
+   list := list[p];
+end procedure;
+
+A:= Partitions(5);
+Shuffle(~A); A;
+cheaterShuffle(A); A;
+
+///////////////////////////////////////////////////
+
+
+/*
+Bonus material on Matrices
+*/
+
+/// MATRICES
+Z:=Integers();
+Q:=Rationals();
+F4<a>:=GF(4);
+Matrix(Z,3,2,[Random(10): i in [1..6]];
+Matrix(Z,3,2,[2,3,4,5,6,7]);
+Matrix(Q,3,2,[2,3,4,5,6,7]);
+Matrix(F4,3,2,[2,3,4,5,6,7]);
+Matrix(Z,3,2,[Random(F4): i in [1..6]]);
+Matrix(F4,3,2,[Random(F4): i in [1..6]]);
+Matrix(F4,3,2,[[a,a^3],[1,0],[a^2,0]]);
+Matrix(F4,[[a,a^3],[1,0],[a^2,0]]);
+DiagonalMatrix(Z,[Random(100):i in [1..10]]);
+DiagonalMatrix(F4,[Random(F4):i in [1..10]]);
+UpperTriangularMatrix(Q,[Random(12): i in [1..10]);
+SymmetricMatrix(Q,[Random(12): i in [1..10]]);
+SymmetricMatrix(Q,[1,2,3,4,5]);
+SymmetricMatrix(Q,[1,2,3,4,5,6]);
+PermutationMatrix(GF(2),[3,2,4,1,6,5]);
+M:=(F4,3,2,[Random(F4):i in [1..6]]);
+M;
+P:=Matrix(F4,3,5,[Random(F4):i in [1..15]]);
+P;
+Transpose(P)*M;
+M*Transpose(P);
+M;P;
+Transpose(M)*P;
+Rank(M);
+MQ:=Matrix(F4,3,3,[Random(F4): i in [1..9]]);
+MQ;
+Rank(M);
+Rank(MQ);
+IsInvertible(MQ);
+Order(MQ);
+Vector(F4,[1,a5,5*a]);
+Vector(F4,[1,a*5,5*a]);
+M;
+MT:=Transpose(M);
+MT;
+MT[3]:=Vector(F4,[1,a*5,5*a]);
+MT[2]:=Vector(F4,[1,a*5,5*a]);
+MT;
+MT[1,1]:=a;
+MT;
+V:=Vector(F4,[1,1,1]);
+MT*V;
+V*MT;
+M*MT;
+MT*M;
+
+
+lambda := Eigenvalues(MQ);
+lambda;
+Dimension(Eigenspace(M,lambda[1]));
+
