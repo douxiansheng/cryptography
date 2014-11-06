@@ -1,0 +1,25 @@
+function genDHparameters(pbits,qbits)
+q := RandomPrime(qbits);
+r := Random(q);
+p := q*r + 1;
+while (IsPrime(p) eq false) do
+      r := Random(q);
+      p := q*r + 1;
+end while;
+g := Random(p-1);
+while ((Modexp(g,q,p-1) eq 1) and (Modexp(g,r,p-1) eq 1)) do
+      g := Random(p-1);
+end while;
+    return p,q,g;
+end function;
+
+
+
+function exchangeDH(p,g)
+a := Random(1,p-1);
+b := Random(1,p-1);
+A := Modexp(g,a,p-1);
+B := Modexp(g,b,p-1);
+S := Modexp(g,a*b, p-1);
+return a,A,b,B,S;
+end function;

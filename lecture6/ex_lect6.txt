@@ -1,0 +1,152 @@
+Ex. 1
+In this exercise we implement Diffie-Hellman Key-exchange
+1. Implement a function genDHparamaters(pbits,qbits)
+     INPUT:
+       - pbits: the bitlength of prime p
+       - qbits: is the length that at least one factor of p-1 must have
+     OUTPUT:
+       - p: a prime number of length pbits
+       - q: a prime factor of p-1 of length qbits
+       - g: a (multiplicative) generator for elements {1..(p-1)}
+REMARKS:
+  * choose p of the form q*r+1 where q is prime of length qbits and r is random
+  * to find a generator for {1..(p-1)} you need to check that both g^q and g^r are not equal to 1 modulo (p-1)
+ 
+Check your code with the following test:
+
+procedure test11()
+  for pars in [[100,20],[256,64]] do
+    pbits := pars[1];
+    qbits := pars[2];
+    print"pbits, qits := ",pbits,qbits;
+    for t in [1..3] do
+      print "t := ",t;
+      p,q,g := genDHparameters(pbits,qbits);
+      if not(IsPrime(p)) or not(IsPrime(q)) then error "p or q is not prime"; end if;
+      if (p-1) mod q ne 0 then error "q is not a factor of p-1"; end if;
+      r := (p-1) div q;
+      if Modexp(g,r,p-1) eq 1 or Modexp(g,q,p-1) eq 1 then error "g is not a generator"; end if;
+    end for;
+  end for;
+end procedure;
+
+2. Implement a function exchangeDH(p,g)
+     INPUT:
+       - p: a prime number
+       - g: a (multiplicative) generator for elements {1..(p-1)}
+     OUTPUT:
+       - a: Alice's secret key
+       - A: Alice's public key
+       - b: Bob's secret key
+       - B: Bob's public key
+       - S: shared secret
+       
+RECALL that:
+  * a and b are random 1 < a,b < p-1
+  * A is g^a modulo p-1
+  * B is g^b modulo p-1
+  * S is g^ab modulo p-1
+
+Check your code with the following test:
+
+procedure test12()
+  for pars in [[100,20],[256,64]] do
+    pbits := pars[1];
+    qbits := pars[2];
+    print"pbits, qits := ",pbits,qbits;
+    p,q,g := genDHparameters(pbits,qbits);
+    print"p := ",p;
+    print"q := ",q;
+    print"g := ",g;    
+    for t in [1..3] do
+      a,A,b,B,S := exchangeDH(p,g);
+      print " t:= ",t;
+      print "a A b B S := ", a,A,b,B,S;
+      if Modexp(B,a,p-1) ne S then error "Alice does not compute the correct shared secret"; end if;
+      if Modexp(A,b,p-1) ne S then error "Bob does not compute the correct shared secret"; end if;
+    end for;
+  end for;
+
+end procedure;
+
+
+EX. 2
+In this exercise we implement RSA Algorithm.
+1. Implement a function genRSAkeys(bitlength)
+     INPUT:
+       - the bitlength of modulus N
+     OUTPUT:
+       - N the modulus, which is product of two random primes
+       - p,q the random primes for which N eq p*q
+       - e the public exponent, which is an integer 1 < e < phi(N) and coprime with phi(N)
+       - d the private exponent, which is the inverse of e mod phi(N)
+
+RECALL that:
+  * for N := p*q, phi(N):= (p-1)*(q-1).
+
+Check your code with the following test:
+
+procedure test21()
+   for l in [10,20,30,50,100,256,512] do
+   print "l := ",l;
+     for t in [1..5] do
+     print "t := ",t;
+       N,p,q,e,d := genRSAkeys(l);
+       print "N := ",N;
+       print "p := ",p;
+       print "q := ",q;
+       print "e := ",e;
+       print "d := ",d;
+       if N ne p*q then error "N is not product of p and q"; end if;
+       if Ilog(2,N) ne l then error "N has not the correct length"; end if;
+       if e*d mod ((p-1)*(q-1)) ne 1 then error "e and d are not inverse modulo phi(N)"; end if;
+     end for;
+   end for;
+end procedure;
+
+2.a Implement a function RSAencrypt(m,N,e)
+     INPUT:
+       - m an integer 1 < m < N (the plaintext)
+       - N, e RSA public key
+     OUTPUT:
+       - c the ciphertext
+
+2.b Implement a function RSAdecrypt(c,N,d)
+     INPUT:
+       - c an integer 1 < c < N (the ciphertext)
+       - N, d RSA private key
+     OUTPUT:
+       - m the plaintext
+
+Check your code with the following test:
+
+procedure test22()
+
+   for l in [50,100,256,512] do
+   print "l := ",l;
+     N,p,q,e,d := genRSAkeys(l);
+     print "N := ",N;
+     print "e := ",e;
+     print "d := ",d;     
+     for t in [1..3] do
+     print "t := ",t;
+     m := Random([2..(N-1)]);
+     c := RSAencrypt(m,N,e);
+     mm := RSAdecrypt(c,N,d);
+     if m ne mm then error "Encryption/Decryption does not work"; end if;
+     print "m := ",m;
+     print "c := ",c;
+     end for;
+  end for;
+end procedure;
+
+EX 3. (BONUS)
+Implement a fuunction dixonFactorization(N,B)
+  INPUT: RSA Modulus N and Factor Base B.
+  OUTPUT: p and q prime such that p*q=N.
+
+USEFUL MAGMA FUNCTIONS FOR THIS SESSION:
+  * Ilog(2,n): gives the bitlength of a number n (integer part of logarithm in base 2)
+  * RandomPrime(bits): which gives you a random prime of bitlength 'bits'
+  * Modexp(x,y,z) to efficiently compute x^y mod z
+  * InverseMod(a,b): which gives you the inverse of 'a' modulo 'b'

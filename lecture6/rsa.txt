@@ -1,0 +1,25 @@
+function genRSAkeys(bitlength)
+	 half := Floor(bitlength / 2);
+	 p := RandomPrime(half);
+	 q := RandomPrime(bitlength - Ilog(2,p));
+	 while(Ilog(2,p*q) ne bitlength) do
+	 	 q := RandomPrime(bitlength - Ilog(2,p));
+	 end while;
+	 N := p*q;
+	 ph := (p-1)*(q-1);
+	 e := Random(2, ph);	 
+	 while(not(IsCoprime(e, ph))) do
+		e := Random(2, ph);	 
+	 end while;
+	 d := Modinv(e, ph);
+	 return  N,p,q,e,d;
+end function;
+
+
+function RSAencrypt(m,N,e)
+	 return  Modexp(m,e,N);
+end function;
+
+function RSAdecrypt(c,N,d)
+	 return  Modexp(c,d,N);
+end function;

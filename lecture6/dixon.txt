@@ -1,0 +1,4 @@
+function dixonFactorization(N,B)
+
+
+end function;
