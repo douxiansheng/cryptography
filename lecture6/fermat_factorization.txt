@@ -1,0 +1,9 @@
+function factorize(n)
+	 a := Ceiling(SquareRoot(n));
+	 b := a*a - n;
+	 while (not(IsSquare(b)) and a le n) do
+	       a := a+1;
+	       b := a*a -n;
+	 end while;
+	 return  Floor(a - SquareRoot(b)), Floor(a + SquareRoot(b));
+end function;
