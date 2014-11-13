@@ -1,0 +1,39 @@
+procedure swap(~S,i,j)
+	  tmp := S[i];
+	  S[i] := S[j];
+	  S[j] := tmp;
+end procedure;
+
+function RC4keyLoad(K)
+	 S := [0..255];
+	 j := 0;
+	 for i in [0..255] do
+	     ip := i mod #K;
+	     j := (j + S[i+1] + K[ip+1]) mod  256;
+	     tmp := S[i+1];
+	     S[i+1] := S[j+1];
+	     S[j+1] := tmp;	     
+	 end for;
+	 return S;
+end function;
+
+function RC4update(i,j,S)
+	 ip := (i + 1) mod 256;
+	 jp := (j + S[ip+1]) mod 256;
+	 swap(~S, ip+1, jp+1);
+	 
+	 return ip,jp,S;
+end function;
+
+function RC4keyStream(S,b)
+	 Key := [];
+	 i := 0;
+	 j := 0;
+	 for k in [1..b] do
+	     i,j,S := RC4update(i,j,S);
+	     l := (S[i+1] + S[j+1]) mod 256;
+	     Key := Append(Key, S[l+1]);
+	 end for;
+	 
+	 return Key;
+end function;

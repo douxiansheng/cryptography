@@ -1,0 +1,63 @@
+Exercise
+--------
+Implement RC4.
+
+You will have to implement the following components:
+1) a procedure swap(~S,i,j)
+INPUT:
+  - ~S, referenced state
+  - i,j indexes (integers in {0..255})
+-> The procedure will have to swap S[i] and S[j]
+
+2) a function RC4keyLoad(K):
+INPUT:
+  - K, the key, is a sequence of integers in {0..255} of length l, with l smaller or equal than 256.
+OUTPUT:
+  - S the initial state after key loading, where S is a sequence of integer in {0..255} of length 256 which represents a permutation of {0..255}
+
+ATTENTION: the index of S goes from 1 to 256, while i and j are from 0 to 255.
+
+2) a function RC4update(i,j,S)
+INPUT:
+  - counters and state (i,j,S)
+OUTPUT:
+  - updated counters and state (i,j,S)
+
+3) a function RC4keyStream(S,b)
+INPUT:
+  - state S
+  - b, number of bytes required for keystream
+OUTPUT:
+  - KS a keystream of b bytes (elements in {0..255})
+
+Test your implementation with the following test vectors (run the script):
+
+K1  := [0x01,0x02,0x03,0x04,0x05];
+KS1 := [0xb2, 0x39, 0x63, 0x05, 0xf0, 0x3d, 0xc0, 0x27, 0xcc, 0xc3, 0x52, 0x4a, 0x0a, 0x11, 0x18, 0xa8];
+
+S   := RC4keyLoad(K1);
+KS  := RC4keyStream(S,16);
+
+KS eq KS1;
+
+
+K2  := [0x8b,0x37,0x64,0x19,0x10,0x83,0x32,0x22,0x77,0x2a];
+KS2 := [0xab, 0x65, 0xc2, 0x6e, 0xdd, 0xb2, 0x87, 0x60, 0x0d, 0xb2, 0xfd, 0xa1, 0x0d, 0x1e, 0x60, 0x5c];
+
+S   := RC4keyLoad(K2);
+KS  := RC4keyStream(S,16);
+
+KS eq KS2;
+
+K3  := Reverse(Intseq(0x1ada31d5cf688221c109163908ebe51debb46227c6cc8b37641910833222772a,256));
+KS3 := [0xdd, 0x5b, 0xcb, 0x00, 0x18, 0xe9, 0x22, 0xd4, 0x94, 0x75, 0x9d, 0x7c, 0x39, 0x5d, 0x02, 0xd3];
+
+S   := RC4keyLoad(K3);
+KS  := RC4keyStream(S,16);
+
+KS eq KS3;
+
+NOTE: Magma converts automatically in integers expressions in hex form like 0x1234567890abcdef.
+Test vectors above are taken from:
+http://tools.ietf.org/html/rfc6229
+
