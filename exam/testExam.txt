@@ -1,0 +1,388 @@
+ /* TEST VECTORS */
+
+/* stream cipher A5/2 */
+
+tvA52 :=
+  [
+  [*             // test vector 1
+  // inputs
+  "33195",                              // initial state of R1
+  "3CC07C",                             // initial state of R2
+  "151B22",                             // initial state of R3
+  "0CE3E",                              // initial state of R4
+  10,                                   // required bit of the keystream
+  // outputs
+  [ 1, 1, 1, 0, 1, 0, 0, 0, 1, 0 ],     // keystream
+  "0CAFA",                              // final state of R1
+  "203E0A",                             // final state of R2
+  "46C8BD",                             // final state of R3
+  "0FA13"                               // final state of R4
+  *]
+  ,
+  [*             // test vector 2
+  // inputs
+  "0CAFA",                              // initial state of R1
+  "203E0A",                             // initial state of R2
+  "46C8BD",                             // initial state of R3
+  "0FA13",                              // initial state of R4
+  30,                                  // required bit of the keystream
+  // outputs
+  [ 1, 0, 0, 0, 1, 0, 0, 1, 0, 1,
+    1, 0, 0, 1, 0, 1, 0, 1, 1, 0,
+    0, 0, 0, 0, 1, 0, 0, 1, 1, 0 ],   // keystream
+  "57572",                              // final state of R1
+  "281087",                             // final state of R2
+  "23BD71",                             // final state of R3
+  "10B56"                               // final state of R4
+  *]
+  ];
+
+
+procedure testA52(clockA52,tvA52)
+
+  alltest := true;
+  for i in [1..#tvA52] do
+    print "testing test vector #",i;
+    tv := tvA52[i];
+    a,b,c,d,e := clockA52(tv[1],tv[2],tv[3],tv[4],tv[5]);
+    thistest := (a eq tv[6]) and (b eq tv[7]) and (c eq tv[8]) and (d eq tv[9]);
+    print "  test passed = ", thistest;
+    alltest := thistest and alltest;
+  end for;
+  print"All test passed? ", alltest;
+  
+end procedure;
+
+function timeA52(clockA52,tvA52)
+  
+  t := Cputime();
+
+  for i in [1..100] do
+    j := (i mod #tvA52) + 1;
+    tv := tvA52[j];
+    a,b,c,d,e := clockA52(tv[1],tv[2],tv[3],tv[4],tv[5]);
+  end for;
+  
+  return Cputime(t);
+  
+end function;
+
+/* stream cipher E0 */
+
+tvE0 :=
+  [
+  [*             // test vector 1
+  // inputs
+  "04B583D",                            // initial state of L1
+  "208E1EC1",                           // initial state of L2
+  "063C142F0",                          // initial state of L3
+  "0F7A2A42BB",                         // initial state of L4
+  [1,1],                                // initial state of ct
+  [0,1],                                // initial state of ctm
+  10,                                   // required bit of the keystream
+  // outputs
+  [ 0, 1, 0, 0, 0, 1, 1, 0, 0, 1 ],     // keystream
+  "160F4BB",                            // final state of L1
+  "387B04F7",                           // final state of L2
+  "1050BC302",                          // final state of L3
+  "68A90AEFD2",                         // final state of L4
+  [ 1, 0 ],                             // final state of ct
+  [ 0, 1 ]                              // final state of ctm
+  *]
+  ,
+  [*             // test vector 2
+  // inputs
+  "18AD7A5",                            // initial state of L1
+  "1F4BC1B0",                           // initial state of L2
+  "196164578",                          // initial state of L3
+  "0CD74FB549",                         // initial state of L4
+  [1,0],                                // initial state of ct
+  [0,1],                                // initial state of ctm
+  30,                                   // required bit of the keystream
+  // outputs
+   [ 1, 1, 0, 0, 0, 0, 1, 1, 0, 1,
+   1, 0, 1, 0, 0, 0,1, 1, 0, 1, 0,
+    1, 0, 1, 1, 0, 1, 0, 1, 1 ],        // keystream
+  "1FF42DF",                            // final state of L1
+  "2BFB18B9",                           // final state of L2
+  "00FF5DEAA",                          // final state of L3
+  "524CC40CE5",                         // final state of L4
+  [ 0, 0 ],                             // final state of ct
+  [ 0, 1 ]                              // final state of ctm
+  *]
+  ];
+
+procedure testE0(clockE0,tvE0)
+
+  alltest := true;
+  for i in [1..#tvE0] do
+    print "testing test vector #",i;
+    tv := tvE0[i];
+    a,b,c,d,e,f,g := clockE0(tv[1],tv[2],tv[3],tv[4],tv[5],tv[6],tv[7]);
+    thistest := (a eq tv[8]) and (b eq tv[9]) and (c eq tv[10]) and (d eq tv[11]) and (e eq tv[12]) and (f eq tv[13]) and (g eq tv[14]);
+    print "  test passed = ", thistest;
+    alltest := thistest and alltest;
+  end for;
+  print"All test passed? ", alltest;
+  
+end procedure;
+
+function timeE0(clockE0,tvE0)
+  
+  t := Cputime();
+
+  for i in [1..1000] do
+    j := (i mod #tvE0) + 1;
+    tv := tvE0[j];
+    a,b,c,d,e,f,g := clockE0(tv[1],tv[2],tv[3],tv[4],tv[5],tv[6],tv[7]);   
+  end for;
+  
+  return Cputime(t);
+  
+end function;
+
+/* block cipher AES */
+
+tvAES :=
+  [
+  [* // test vector 1
+  // key
+  "0000000000000000000000000000000000000000000000000000000000000000",
+  // plaintext
+  "80000000000000000000000000000000",
+  // ciphertext
+  "DDC6BF790C15760D8D9AEB6F9A75FD4E"
+  *],
+  [* // test vector 2
+  // key
+  "0000000000000000000000000000000000000000000000000000000000000000",
+  // plaintext
+  "FFFFFFFFFFFFFFFFFC00000000000000",
+  // ciphertext
+  "811441CE1D309EEE7185E8C752C07557"
+  *],
+  [* // test vector 3
+  // key
+  "FFFFFFFFFFFFFFFFFFFFFFFE0000000000000000000000000000000000000000",
+  // plaintext
+  "00000000000000000000000000000000",
+  // ciphertext
+  "15C6BECF0F4CEC7129CBD22D1A79B1B8"
+  *],
+  [* // test vector 4
+  // key
+  "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFC",
+  // plaintext
+  "00000000000000000000000000000000",
+  // ciphertext
+  "27936BD27FB1468FC8B48BC483321725"
+  *]
+  ];
+
+procedure testAES(encryptAES,tvAES)
+
+  alltest := true;
+  for i in [1..#tvAES] do
+    print "testing test vector #",i;
+    tv := tvAES[i];
+    a := encryptAES(tv[1],tv[2]);  
+    thistest := (a eq tv[3]);
+    print "  test passed = ", thistest;
+    alltest := thistest and alltest;
+  end for;
+  print"All test passed? ", alltest;
+  
+end procedure;
+
+function timeAES(encryptAES,tvAES)
+  
+  t := Cputime();
+
+  for i in [1..100] do
+    j := (i mod #tvAES) + 1;
+    tv := tvAES[j];
+    a := encryptAES(tv[1],tv[2]);
+  end for;
+  
+  return Cputime(t);
+  
+end function;
+
+/* block cipher SERPENT */
+
+tvSERPENT :=
+  [
+  [* // test vector 1
+  // key
+  "0000000000000000000000000000000000000000000000000000000400000000",
+  // plaintext
+  "00000000000000000000000000000000",
+  // ciphertext
+  "C07DE68CB0ED8C8D398B87D6547BD15B"
+  *],
+  [* // test vector 2
+  // key
+  "0000000000000000000000000000000000000000000000000000000000000000",
+  // plaintext
+  "00000000000000000000000000080000",
+  // ciphertext
+  "D18CC92248E209FF8C9AF4AC93588727"
+  *],
+  [* // test vector 3
+  // key
+  "F8F8F8F8F8F8F8F8F8F8F8F8F8F8F8F8F8F8F8F8F8F8F8F8F8F8F8F8F8F8F8F8",
+  // plaintext
+  "F8F8F8F8F8F8F8F8F8F8F8F8F8F8F8F8",
+  // ciphertext
+  "52B0617576697BC68FC70197951CE2CD"
+  *],
+  [* // test vector 4
+  // key
+  "000102030405060708090A0B0C0D0E0F101112131415161718191A1B1C1D1E1F",
+  // plaintext
+  "00112233445566778899AABBCCDDEEFF",
+  // ciphertext
+  "2868B7A2D28ECD5E4FDEFAC3C4330074"
+  *]
+  ];
+
+procedure testSERPENT(encryptSERPENT,tvSERPENT)
+
+  alltest := true;
+  for i in [1..#tvAES] do
+    print "testing test vector #",i;
+    tv := tvSERPENT[i];
+    a := encryptSERPENT(tv[1],tv[2]);  
+    thistest := (a eq tv[3]);
+    print "  test passed = ", thistest;
+    alltest := thistest and alltest;
+  end for;
+  print"All test passed? ", alltest;
+  
+end procedure;
+
+function timeSERPENT(encryptSERPENT,tvSERPENT)
+  
+  t := Cputime();
+
+  for i in [1..100] do
+    j := (i mod #tvSERPENT) + 1;
+    tv := tvSERPENT[j];
+    a := encryptSERPENT(tv[1],tv[2]);
+  end for;
+  
+  return Cputime(t);
+  
+end function;
+
+
+/* hash function SHA2 */
+
+tvSHA2 := 
+  [
+  [* // test vector 1
+  // input
+  "616263",
+  // output
+  "BA7816BF8F01CFEA414140DE5DAE2223B00361A396177A9CB410FF61F20015AD"
+  *],
+  [* // test vector 2
+  // input
+  "6162636462636465636465666465666765666768666768696768696A68696A6B696A6B6C6A6B6C6D6B6C6D6E6C6D6E6F6D6E6F706E6F7071",
+  // output
+  "248D6A61D20638B8E5C026930C3E6039A33CE45964FF2167F6ECEDD419DB06C1"
+  *],
+  [* // test vector 3
+  // input
+  "616D6272612065206769756C69612068616E6E6F20636F6D706C657461746F206C27696\
+D706C656D656E74617A696F6E65206469205348412D3235362E2046756E7A696F6E612062656E6\
+521",
+  // output
+  "C17B7A1F3B6A5191B2946E2C03146860AB37758F2A3EE3B3D17A158053187E9D"
+  *]
+  ];
+
+procedure testSHA2(hashSHA2,tvSHA2)
+
+  alltest := true;
+  for i in [1..#tvSHA2] do
+    print "testing test vector #",i;
+    tv := tvSHA2[i];
+    a := hashSHA2(tv[1]);
+    thistest := (a eq tv[2]);
+    print "  test passed = ", thistest;
+    alltest := thistest and alltest;
+  end for;
+  print"All test passed? ", alltest;
+  
+end procedure;
+
+function timeSHA2(hashSHA2,tvSHA2)
+  
+  t := Cputime();
+
+  for i in [1..100] do
+    j := (i mod #tvSHA2) + 1;
+    tv := tvSHA2[j];
+    a := hashSHA2(tv[1]);
+  end for;
+  
+  return Cputime(t);
+  
+end function;
+
+
+/* hash function SHA3 */
+
+tvSHA3 := 
+  [
+  [* // test vector 1
+  // input
+  "616263",
+  // output
+  "3A985DA74FE225B2045C172D6BD390BD855F086E3E9D525B46BFE24511431532"
+  *],
+  [* // test vector 2
+  // input
+  "6162636462636465636465666465666765666768666768696768696A68696A6B696A6B6C6A6B6C6D6B6C6D6E6C6D6E6F6D6E6F706E6F7071",
+  // output
+  "41C0DBA2A9D6240849100376A8235E2C82E1B9998A999E21DB32DD97496D3376"
+  *],
+  [* // test vector 3
+  // input
+  "61626364656667686263646566676869636465666768696A6465666768696A6B\
+65666768696A6B6C666768696A6B6C6D6768696A6B6C6D6E68696A6B6C6D6E6F696\
+A6B6C6D6E6F706A6B6C6D6E6F70716B6C6D6E6F7071726C6D6E6F707172736D6E6F70717273746E6F707172737475",
+  // output
+  "916F6061FE879741CA6469B43971DFDB28B1A32DC36CB3254E812BE27AAD1D18"
+  *]
+  ];
+
+procedure testSHA3(hashSHA3,tvSHA3)
+
+  alltest := true;
+  for i in [1..#tvSHA3] do
+    print "testing test vector #",i;
+    tv := tvSHA3[i];
+    a := hashSHA3(tv[1]);
+    thistest := (a eq tv[2]);
+    print "  test passed = ", thistest;
+    alltest := thistest and alltest;
+  end for;
+  print"All test passed? ", alltest;
+  
+end procedure;
+
+function timeSHA3(hashSHA3,tvSHA3)
+  
+  t := Cputime();
+
+  for i in [1..10] do
+    j := (i mod #tvSHA3) + 1;
+    tv := tvSHA3[j];
+    a := hashSHA3(tv[1]);
+  end for;
+  
+  return Cputime(t);
+  
+end function;

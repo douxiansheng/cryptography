@@ -1,0 +1,150 @@
+RC:=[0x0000000000000001,
+        0x0000000000008082,
+        0x800000000000808A,
+        0x8000000080008000,
+        0x000000000000808B,
+        0x0000000080000001,
+        0x8000000080008081,
+        0x8000000000008009,
+        0x000000000000008A,
+        0x0000000000000088,
+        0x0000000080008009,
+        0x000000008000000A,
+        0x000000008000808B,
+        0x800000000000008B,
+        0x8000000000008089,
+        0x8000000000008003,
+        0x8000000000008002,
+        0x8000000000000080,
+        0x000000000000800A,
+        0x800000008000000A,
+        0x8000000080008081,
+        0x8000000000008080,
+        0x0000000080000001,
+        0x8000000080008008];
+
+function Negate(v)
+	 n := Vector(GF(2), [1: i in [1..64]]);
+	 return v + n;
+end function;
+
+r := [[0, 36, 3, 41, 18],
+           [1, 44, 10, 45, 2],
+       	   [62, 6, 43, 15, 61],
+       	   [28, 55, 25, 21, 56],
+       	   [27, 20, 39, 8, 14]];	 
+
+function Round(A, RC)
+
+	 // Theta
+	 C := [];
+	 D := [];
+	 for x in [1..5] do
+	     C[x] := A[x][1] + A[x][2] + A[x][3] + A[x][4] + A[x][5];
+	 end for;
+	 for x in [0..4] do
+	     D[x+1] := C[((x-1) mod 5)+1] + Rotate(C[((x+1) mod 5)+1], 1);
+	 end for;
+	 for x,y in [1..5] do
+	     A[x][y] +:= D[x];
+	 end for;
+	 B := A;
+	 for x,y in [1..5] do
+	     B[y][x] := A[x][y];
+	 end for;
+	 // Rho
+	 A := B;
+	 for x,y in [1..5] do
+	     A[y][x] := Rotate(A[y][x], r[x][y]);
+	 end for;
+
+	 // Pi
+	 B := A;
+	 for x,y in [0..4] do
+	     B[y+1][x+1] := A[x+1][((x+3*y)mod 5)+1];
+	 end for;
+
+	 // Chi
+	 for x,y in [0..4] do
+	     A[x+1][y+1] := B[y+1][x+1] + (Negate(B[y+1][((x+1) mod 5)+1]) * B[y+1][((x+2) mod 5)+1]);
+	 end for;
+	 
+	 // Iota
+	 A[1][1] +:= Vector(GF(2), Intseq(RC,2,64));
+	 return A;
+end function;
+
+function MessageToBinary(M)
+	 n := #M;
+	 B := [];
+	 for i in [0..n/2-1] do
+	     B := B cat Intseq(StringToInteger(M[2*i+2],16),2,4);
+	     B := B cat Intseq(StringToInteger(M[2*i+1],16),2,4);
+	 end for;
+	 return B;
+end function;
+
+function Pad(m)
+	 j := (-m - 2) mod 1088;
+	 return [1] cat [0: i in [1..j]] cat [1];
+end function;
+
+function VectorToState(S)
+	 w := 64;
+	 A := [[],[],[],[],[]];
+	 i := 1;
+	 for x,y in [1..5] do
+	     A[y][x] := Vector(GF(2), S[i..i+w-1]);
+	     i +:= w;
+	 end for;
+	 return A;
+end function;
+
+function StateToVector(A)
+	 S := [];
+	 for x,y in [1..5] do
+	     S := S cat Eltseq(A[y][x]);
+	 end for;
+	 return S;
+end function;
+
+function Keccak(S)
+	 A := VectorToState(Eltseq(S));
+	 for i in [1..24] do
+	 	 A := Round(A, RC[i]);
+	 end for;
+	 A := StateToVector(A);
+	 return A;
+end function;
+
+function BinaryToMessage(R)
+	 M := [];
+	 i := 0;
+	while i le 248 do
+	    l1 := [Integers() ! R[i+1], Integers() ! R[i+2], Integers() ! R[i+3], Integers() ! R[i+4]];
+	    l2 := [Integers() ! R[i+5], Integers() ! R[i+6], Integers() ! R[i+7], Integers() ! R[i+8]];
+	    s1 := IntegerToString(SequenceToInteger(l1,2),16);
+	    s2 := IntegerToString(SequenceToInteger(l2,2),16);
+	    M := M cat [s2] cat [s1];
+	    i +:= 8;
+	end while;
+	return &cat M;
+end function;
+
+function hashSHA3(M)
+	 if IsOdd(#M) then
+	    M := M * "0";
+	 end if;
+	 M := MessageToBinary(M) cat [0,1];
+	 P := M cat Pad(#M);
+	 r := 1088;
+	 n := Floor(#P/r);
+	 S := Vector(GF(2), [0: i in [1..1600]]);
+	 for i in [0..n-1] do
+	     B := P[i*r+1..i*r+r] cat [0: i in [1..512]];
+	     B := Vector(GF(2), B);
+	     S := Keccak(S+B);
+	 end for;
+	 M := BinaryToMessage(S);
+	 return M;
+end function;

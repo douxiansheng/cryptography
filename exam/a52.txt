@@ -1,0 +1,72 @@
+function LoadRegister(s, n)
+	 raw := Eltseq(s);
+	 ints := [StringToInteger(el, 16): el in raw];
+	 bits := [Intseq(el,2,4) : el in ints];
+	 state := [(&cat Reverse(bits))[i]: i in {1..n}];
+	 return  state;
+end function;
+
+function Dump(R)
+	 n := #R;
+	 q := Floor(n/4);
+	 r := n mod 4;
+	 dump := [];
+	 l := [];
+	 for i in [0..q-1] do 
+	     l := [Integers() ! R[4*i+1], Integers() ! R[4*i+2], Integers() ! R[4*i+3], Integers() ! R[4*i+4]];
+	     dump := Append(dump, IntegerToString(SequenceToInteger(l,2),16));
+	 end for;
+	 l:=[];
+	 for i in [1..r] do
+	     l := Append(l, Integers() ! R[4*q+i]); 
+	 end for;
+	 dump := Append(dump, IntegerToString(SequenceToInteger(l,2),16));
+	 return &cat dump;
+end function;
+
+procedure Shift(~R, taps)
+	 first := GF(2) ! (&+[R[i] : i in taps]);
+	 R := [first] cat [R[i] : i in [1..#R-1]];
+end procedure;
+
+function clockA52(s1, s2, s3, s4, nbits)
+	 P<a,b,c> := PolynomialRing(GF(2), 3);
+	 major := a*b + a*c + b*c;
+	 tapR1 := [19,18,17,14];
+	 tapR2 := [22,21];
+	 tapR3 := [23,22,21,8];
+	 tapR4 := [17,12];
+	 R1 := LoadRegister(s1, 19);
+	 R2 := LoadRegister(s2, 22);
+	 R3 := LoadRegister(s3, 23);
+	 R4 := LoadRegister(s4, 17);
+	 K := [];
+
+	 for i in [1..nbits] do 
+	     res := Evaluate(major, [R4[11], R4[8], R4[4]]);
+	     
+	     if (res + R4[11] eq 0) then
+             	Shift(~R1, tapR1);
+             end if;
+	     if (res + R4[4] eq 0) then
+             	Shift(~R2, tapR2);
+             end if;
+	     if (res + R4[8] eq 0) then
+             	Shift(~R3, tapR3);
+             end if;
+	     Shift(~R4, tapR4);
+	     
+	     out1 := R1[19];
+	     out2 := R2[22];
+	     out3 := R3[23];	
+	     
+	     res1 := Evaluate(major, [R1[16],GF(2) ! R1[15] + 1 ,R1[13]]);
+	     res2 := Evaluate(major, [GF(2) ! R2[17]+1,R2[14],R2[10]]);
+	     res3 := Evaluate(major, [R3[19],R3[17],GF(2) ! R3[14]+1]);
+	     
+	     out := GF(2) ! (res1 + res2 + res3 + out1+ out2 + out3);
+	     K := Append(K, out);
+	 end for;
+	 return  K,Reverse(Dump(R1)),Reverse(Dump(R2)),Reverse(Dump(R3)),Reverse(Dump(R4));
+end function;
+

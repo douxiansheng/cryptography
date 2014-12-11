@@ -1,0 +1,84 @@
+Exercise
+————————
+Implement PRESENT
+
+You will have to implement the following components:
+
+1) A function PRESENTAddRoundKey(Si,Ki)
+   INPUT:       - Si, the ith state, a sequence of 63 bits
+                - Ki, the ith round key, a sequence of 64 bits
+
+   OUTPUT:      - a sequence Si+Ki of 64 bits, where + is the bitwise XOR
+
+
+2) A function PRESENTsBoxLayer(S)
+   INPUT:       - S, the current state, a sequence of 64 bits
+   
+   OUTPUT:      - a sequence of 64 bits 
+
+S is a sequence S[63],…,S[0] which has to be considered as sixteen 4-bit words
+w[15],…,w[0] where w[i]=S[4*i+3]||S[4*i+2]||S[4*i+1]||S[4*i] for i in {0,…,15}, 
+where || is the concatenation.
+
+The S-Box is a 4 bit to 4-bit Boolean function. The action of this S-Box in hexadecimal notation is given by:
+S-Box: [0,1,2,3,4,5,6,7,8,A,B,C,D,E,F]—>[C,5,6,B,9,0,A,D,3,E,F,8,4,7,1,2]
+
+
+3) PRESENTpLayer(S)
+   INPUT:       - S, the current state, a sequence of 64 bits
+                
+   OUTPUT:      - a sequence of 64 bits
+
+The action of this layer is given by
+S[4*i]—>S[i] for i in{0,..,15}
+S[4*i+1]—>S[i+16] for i in{0,..,15}
+S[4*i+2]—>S[i+32] for i in{0,..,15}
+S(4*i+3)—>S[i+48] for i in{0,..,15}
+
+
+4) A function PRESENTKeySchedule(Kr)
+   INPUT:       - Kr, the key register, a sequence of 80 bits
+
+   OUTPUT:      - K a sequence of 32 round-keys, of length 64 bits each
+
+The ith round key Ki consists of the 64 leftmost bits of the current 
+contents of register Kr.
+After extracting the round key Ki, the key register Kr=[Kr[79],…,Kr[0]] is updated as follows:
+1. the key register is rotated by 61 bit positions to the left: 
+   [Kr[79],…,Kr[0]]=[Kr[18],Kr[17],…,Kr[20],Kr[19]
+2. the left-most four bits are passed through the PRESENT S-Box:
+   [Kr[79],Kr[78],Kr[77],Kr[76]]=S-Box([Kr[79],Kr[78],Kr[77],Kr[76]])
+3. [Kr[19],Kr[18],Kr[17],Kr[16],Kr[15]]=[Kr[19],Kr[18],Kr[17],Kr[16],Kr[15]] XOR round
+   counter value i
+NOTE: the first round key is generated before the first key register updating
+
+
+5) A function PRESENT(M,Kr)
+   INPUT:        - Kr, the key register, a sequence of 80 bits
+                 - M, the message, a sequence of 64 bits
+
+   OUTPUT:       - C, the ciphertext, a sequence of 64 bits
+
+   1. PRESENTKeySchedule
+
+   2. 31 rounds:
+      2.1) PRESENTAddRoundKey
+      2.2) PRESENTsBoxLayer
+      2.3) PRESENTpLayer
+
+   3. 32nd round:
+      PRESENTAddRoundKey
+      
+
+-> TEST your PRESENT in hexadecimal notation:
+
+M:= [0x0000000000000000, 0x0000000000000000, 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF];
+Kr:= [0x00000000000000000000, 0xFFFFFFFFFFFFFFFFFFFF, 0x00000000000000000000,0xFFFFFFFFFFFFFFFFFFFF];
+
+for i in [1..4] do
+	present(M[i],Kr[i]);
+end for;
+[ 0x5, 0x5, 0x7, 0x9, 0xC, 0x1, 0x3, 0x8, 0x7, 0xB, 0x2, 0x2, 0x8, 0x4, 0x4, 0x5 ]
+[ 0xE, 0x7, 0x2, 0xC, 0x4, 0x6, 0xC, 0x0, 0xF, 0x5, 0x9, 0x4, 0x5, 0x0, 0x4, 0x9 ]
+[ 0xA, 0x1, 0x1, 0x2, 0xF, 0xF, 0xC, 0x7, 0x2, 0xF, 0x6, 0x8, 0x4, 0x1, 0x7, 0xB ]
+[ 0x3, 0x3, 0x3, 0x3, 0xD, 0xC, 0xD, 0x3, 0x2, 0x1, 0x3, 0x2, 0x1, 0x0, 0xD, 0x2 ]
