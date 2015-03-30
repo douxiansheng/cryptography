@@ -5,8 +5,8 @@ from math import log
 
 n = int(raw_input("Input the number to be tested : "))
 
-if n % 2 == 0:
-    print('Hope you\' kidding...\n')
+if n % 2 == 0 or n % 5 == 0:
+    print('Hope you\'re kidding...\n')
     exit()
 
 witnesses = [2,3,5,7,11,13,17,19,23]
@@ -33,7 +33,7 @@ for i in range(1, bound):
     else:
         x = witnesses[i-1]
     if pow(x, phin, n) != 1:
-        print('Composite, witness '+ str(x) + '\n')
+        print('Composite, Miller-Rabin witness '+ str(x) + '\n')
         exit()
     elif pow(x, d, n) in [1, phin]:
         continue
@@ -41,7 +41,7 @@ for i in range(1, bound):
         for k in range(1,s):
             res = pow(x, d*pow(2,k), n)
             if res == 1:
-                print('Composite, witness ' + str(x) + '\n')
+                print('Composite, Miller-Rabin witness ' + str(x) + '\n')
                 exit()
             elif res == phin:
                 break

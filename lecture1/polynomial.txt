@@ -1,6 +1,6 @@
 function poly(q,d)
 	 Z<x> := PolynomialRing(GF(q));
-	 F := GF(q);
+	 F<a> := GF(q);
 	 V := VectorSpace(F, d+1);	 
 	 C := Random(V); 
 	 p := 0;
