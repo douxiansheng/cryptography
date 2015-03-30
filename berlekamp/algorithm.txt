@@ -1,22 +1,10 @@
-q := 81;
-Fq<a> := GF(q);
-F<x> := PolynomialRing(Fq);
-f := a^4*x^131 + a^61*x^130 + a^6*x^129 + a^3*x^128 + a^50*x^127 + a^55*x^126 + a^19*x^125 + a^6*x^124 + a^39*x^123 + a^39*x^122 + a^70*x^121 + a*x^120 + a^39*x^118 + a^50*x^117 + a^18*x^116 + a^30*x^115 + 
-    x^114 + a^20*x^113 + a^66*x^112 + a^14*x^111 + a^11*x^110 + a^79*x^109 + a^67*x^108 + a^66*x^107 + 2*x^106 + a^42*x^105 + a^11*x^104 + a^69*x^103 + a^54*x^102 + a^66*x^101 + a^17*x^100 + a^59*x^99 + 
-    a^55*x^98 + a^66*x^97 + a^6*x^96 + a^45*x^95 + a^71*x^94 + a^76*x^93 + a^29*x^92 + a^68*x^91 + a^14*x^90 + a^6*x^89 + 2*x^88 + a^24*x^87 + a^77*x^86 + a^57*x^85 + a^55*x^84 + a^78*x^83 + a^15*x^82 + 
-    a^11*x^81 + a^6*x^80 + a^7*x^79 + a^52*x^78 + a^76*x^77 + a^55*x^76 + a^30*x^75 + a^36*x^74 + a^33*x^73 + a^69*x^71 + a^5*x^70 + a^7*x^69 + a^15*x^68 + a^68*x^67 + a^30*x^66 + a^71*x^65 + a^6*x^64 + 
-    a^67*x^63 + x^62 + a^27*x^61 + a^17*x^60 + a^20*x^59 + a^8*x^58 + a^14*x^57 + a^12*x^56 + a^43*x^55 + a^10*x^54 + a^36*x^53 + a^30*x^52 + a^64*x^51 + a^59*x^50 + a^39*x^49 + a^53*x^48 + a^3*x^47 + 
-    a^44*x^46 + a^78*x^45 + a^42*x^44 + a^73*x^43 + a*x^42 + a^79*x^41 + a^67*x^40 + a^68*x^39 + a^31*x^38 + a^57*x^37 + a^62*x^36 + a^53*x^35 + a^15*x^34 + a^54*x^33 + a^51*x^32 + a^11*x^31 + a^69*x^30 +
-    a^72*x^29 + a^10*x^28 + a^39*x^27 + a^74*x^26 + a^76*x^25 + a^57*x^24 + a^10*x^23 + a^36*x^22 + a^42*x^21 + a^33*x^20 + a^19*x^19 + a^26*x^18 + a^59*x^17 + a*x^16 + a^61*x^15 + a^23*x^14 + a^42*x^13 +
-    a^36*x^12 + a^21*x^11 + a^28*x^10 + a^13*x^9 + a^4*x^8 + a^53*x^7 + a^37*x^6 + a^64*x^5 + a^75*x^4 + x^3 + a^27*x^2 + a^48*x + a^70;
-
-function FindFactors(H,f,i, bound, mult)
+function FindFactors(H,f,i, bound, mult, Fq, F)
 	 L := [];
 	 if (i le bound) then
 	 for el in Fq do
 	     g := Gcd(f, F ! H[i]-el);
 	     if (g ne 1) then
-	     	L := L cat FindFactors(H, g, i+1, bound, mult);
+	     	L := L cat FindFactors(H, g, i+1, bound, mult, Fq, F);
 	     end if;
 	 end for;
 	 end if;
@@ -26,7 +14,7 @@ function FindFactors(H,f,i, bound, mult)
 	 return L;
 end function;
 
-function Berlekamp(f, mult)
+function Berlekamp(f, mult, Fq, F, q)
     	ide := ideal<F|f>;
 	Q<x> := quo<F|ide>;
 	n := Degree(f);
@@ -51,37 +39,45 @@ function Berlekamp(f, mult)
        	     	H := Append(H, poly);
     	     end if;
    	 end for;
-	 res := FindFactors(H, f,1, bound, mult);
+	 res := FindFactors(H, f,1, bound, mult, Fq, F);
 	 return res;
 end function;
 
-factors := [];
-p := Characteristic(Fq);
-derf := Derivative(f);
-d := Gcd(f,derf);
-mult := 1;
-
-while d ne 1 do
-      if (d eq f) then
-      	 while (derf eq 0) do
-	       	 f := Root(f, p);
-	 	 derf := Derivative(f);
-	 	 d := Gcd(f,derf);
-		 mult *:= p;
- 	 end while;
-      elif (d gt 1) then
-      	 factors := factors cat Berlekamp(f div d, mult);
-	 f := d;
+function algoritmoBerlekamp(q,f)
+	 Fq<a> := GF(q);
+	 F<x> := PolynomialRing(Fq);
+	 f := f div LeadingCoefficient(f);
+	 factors := [];
+	 p := Characteristic(Fq);
 	 derf := Derivative(f);
 	 d := Gcd(f,derf);
-      end if;
-end while;
+	 mult := 1;
 
-if d eq 1 then
-   factors := factors cat Berlekamp(f, mult);
-end if;
-factors;
+	 while d ne 1 do
+      	       if (d eq f) then
+      	       	  while (derf eq 0) do
+	       	  	f := Root(f, p);
+	 	 	derf := Derivative(f);
+	 	 	d := Gcd(f,derf);
+		 	mult *:= p;
+ 	 	  end while;
+      	       elif (d gt 1) then
+      	       factors := factors cat Berlekamp(f div d, mult, Fq, F, q);
+	       f := d;
+	       derf := Derivative(f);
+	       d := Gcd(f,derf);
+      	       end if;
+	 end while;
 
+	 if d eq 1 then
+   	    factors := factors cat Berlekamp(f, mult, Fq, F, q);
+	 end if;
+
+	 tmp := {<p[1], &+[p1[2] :p1 in factors | p[1] eq p1[1]]> : p in factors};
+
+	 factors := Sort(SetToSequence(tmp));
+         return factors;
+end function;
 
 
 
